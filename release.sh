@@ -21,7 +21,7 @@
 # THE GITHUB ACCESS TOKEN, GENERATE ONE AT: https://github.com/settings/tokens
 
 DIRECTORY_SEPERATOR="\\";
-RELEASE_DIRECTORY="D:\\plugin_released\\" # change release directory
+RELEASE_DIRECTORY="D:\\plugin_released\\" # change release directory | please put the location of configuration file directory path
 
 if [ -z "$1" ]
   then
@@ -31,7 +31,8 @@ fi
 
 PLUGIN_SLUG="$1"
 
-PLUGIN_PATH=${RELEASE_DIRECTORY}${PLUGIN_SLUG}"-git"${DIRECTORY_SEPERATOR}
+GIT_PLUGIN_PATH=${RELEASE_DIRECTORY}${PLUGIN_SLUG}"-git"${DIRECTORY_SEPERATOR}
+SVN_PLUGIN_PATH=${RELEASE_DIRECTORY}${PLUGIN_SLUG}"-svn"${DIRECTORY_SEPERATOR}
 PLUGIN_INI_PATH="$RELEASE_DIRECTORY$PLUGIN_SLUG.ini"
 
 if [ ! -e "$PLUGIN_INI_PATH" ]
@@ -108,8 +109,8 @@ read -p "PRESS [ENTER] TO BEGIN RELEASING "${VERSION}
 
 # VARS
 ROOT_PATH=$(pwd)"/"
-TEMP_GITHUB_REPO=$PLUGIN_PATH
-TEMP_SVN_REPO=${PLUGIN_PATH}"-svn"
+TEMP_GITHUB_REPO=$GIT_PLUGIN_PATH
+TEMP_SVN_REPO=$SVN_PLUGIN_PATH
 SVN_REPO="http://plugins.svn.wordpress.org/"${PLUGIN_SLUG}"/"
 GIT_REPO="git@github.com:"${GITHUB_REPO_OWNER}"/"${GITHUB_REPO_NAME}".git"
 
@@ -128,7 +129,7 @@ fi
 git clone --progress $GIT_REPO $TEMP_GITHUB_REPO || { echo "Unable to clone repo."; exit 1; }
 
 # MOVE INTO GIT DIR
-cd $PLUGIN_PATH
+cd $GIT_PLUGIN_PATH
 
 # LIST BRANCHES
 clear
@@ -149,7 +150,7 @@ read -p "PRESS [ENTER] TO DEPLOY BRANCH "${BRANCH}
 echo "Removing unwanted files files are :$IGNORE_FILES"
 export IFS=","
  for word in $IGNORE_FILES; do
-        PASSED_PATH_BEFORE_TRIM="$PLUGIN_PATH""${word////$DIRECTORY_SEPERATOR}"
+        PASSED_PATH_BEFORE_TRIM="$GIT_PLUGIN_PATH""${word////$DIRECTORY_SEPERATOR}"
          PASSED_PATH="${PASSED_PATH_BEFORE_TRIM##*( )}"
         if [[ -d $PASSED_PATH ]]; then
 
@@ -164,8 +165,7 @@ export IFS=","
         fi
 
 done
-echo "Finally done"
-exit 1;
+
 
 # MOVE INTO SVN DIR
 cd $TEMP_SVN_REPO
@@ -180,6 +180,7 @@ rm -Rf trunk/
 
 # COPY GIT DIR TO TRUNK
 cp -R $TEMP_GITHUB_REPO trunk/
+
 
 # DO THE ADD ALL NOT KNOWN FILES UNIX COMMAND
 svn add --force * --auto-props --parents --depth infinity -q
@@ -222,4 +223,4 @@ rm -Rf $TEMP_GITHUB_REPO
 rm -Rf $TEMP_SVN_REPO
 
 # DONE, BYE
-echo "RELEASER DONE :D"
+echo "Yeahh! you're done :D"
